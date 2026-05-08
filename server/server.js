@@ -19,7 +19,7 @@ app.use((error, req, res, next) => {
 
 // Routes
 app.get("/", (req, res) => res.send("Api Working"));
-app.post("/clerk", express.json(), clerkWebhooks);
+app.post("/clerk", express.raw({ type: "application/json" }), clerkWebhooks);
 
 // connect database
 dbConnection();
