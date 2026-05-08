@@ -8,7 +8,6 @@ const app = express();
 
 // Middlewares
 app.use(cors());
-app.use(express.json());
 
 app.use((error, req, res, next) => {
   res.status(400).json({
@@ -18,12 +17,12 @@ app.use((error, req, res, next) => {
   });
 });
 
-// connect database
-dbConnection();
-
 // Routes
 app.get("/", (req, res) => res.send("Api Working"));
 app.post("/clerk", clerkWebhooks);
+
+// connect database
+dbConnection();
 
 const PORT = process.env.port || 5000;
 

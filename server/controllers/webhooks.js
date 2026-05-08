@@ -3,7 +3,7 @@ import { catchError } from "../utils/catchError.js";
 import UserModel from "../models/User.js";
 
 export const clerkWebhooks = catchError(async (req, res, next) => {
-  const webhook = new Webhook(process.env.CLERK_WEBOOK_SECRET);
+  const webhook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
 
   await webhook.verify(JSON.stringify(req.body), {
     "svix-id": req.headers["svix-id"],
