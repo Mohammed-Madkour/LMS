@@ -20,7 +20,7 @@ export const clerkWebhooks = catchError(async (req, res, next) => {
       const userData = {
         _id: data.id,
         name: data.first_name + " " + data.last_name,
-        email: data.email_addresses[0].email,
+        email: data.email_addresses[0].email_address,
         imageUrl: data.image_url,
       };
 
@@ -32,7 +32,7 @@ export const clerkWebhooks = catchError(async (req, res, next) => {
     case "user.updated": {
       const userData = {
         name: data.firstname + " " + data.lastname,
-        email: data.email_addresses[0].email,
+        email: data.email_addresses[0].email_address,
         imageUrl: data.image_url,
       };
       await UserModel.findByIdAndUpdate(data.id, userData);
