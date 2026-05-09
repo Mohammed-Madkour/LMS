@@ -2,7 +2,7 @@ import { Webhook } from "svix";
 import { catchError } from "../utils/catchError.js";
 import UserModel from "../models/User.js";
 
-export const clerkWebhooks = catchError(async (req, res, next) => {
+export const clerkWebhooks = catchError(async (req, res) => {
   const webhook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
 
   const payload = JSON.stringify(req.body);
@@ -13,40 +13,35 @@ export const clerkWebhooks = catchError(async (req, res, next) => {
     "svix-signature": req.headers["svix-signature"],
   };
 
-  const { data, type } = req.body;
+  const event = webhook.verify(payload, headers);
+
+  const { data, type } = event;
 
   switch (type) {
     case "user.created": {
-      const userData = {
+      await UserModel.create({
         _id: data.id,
-        name: data.first_name + " " + data.last_name,
+        name: `${data.first_name} ${data.last_name}`,
         email: data.email_addresses[0].email_address,
         imageUrl: data.image_url,
-      };
-
-      await UserModel.create(userData);
-      res.json({});
+      });
       break;
     }
 
     case "user.updated": {
-      const userData = {
-        name: data.first_name + " " + data.last_name,
+      await UserModel.findByIdAndUpdate(data.id, {
+        name: `${data.first_name} ${data.last_name}`,
         email: data.email_addresses[0].email_address,
         imageUrl: data.image_url,
-      };
-      await UserModel.findByIdAndUpdate(data.id, userData);
-      res.json({});
+      });
       break;
     }
 
     case "user.deleted": {
       await UserModel.findByIdAndDelete(data.id);
-      res.json({});
       break;
     }
-
-    default:
-      break;
   }
+
+  res.json({ success: true });
 });
