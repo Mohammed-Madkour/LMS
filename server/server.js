@@ -6,20 +6,16 @@ import { clerkWebhooks } from "./controllers/webhooks.js";
 
 const app = express();
 
-app.use(cors());
-
-// Clerk webhook MUST come BEFORE json middleware
-app.post("/clerk", express.raw({ type: "application/json" }), clerkWebhooks);
-
-app.use(express.json());
-
-// Routes
-app.get("/", (req, res) => res.send("Api Working"));
-
 // connect database
 dbConnection();
 
-// error handler LAST
+// Middlewares
+app.use(cors());
+
+// Routes
+app.get("/", (req, res) => res.send("Api Working"));
+app.post("/clerk", express.json(), clerkWebhooks);
+
 app.use((error, req, res, next) => {
   res.status(400).json({
     success: false,

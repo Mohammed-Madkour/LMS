@@ -5,7 +5,7 @@ import UserModel from "../models/User.js";
 export const clerkWebhooks = catchError(async (req, res) => {
   const webhook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
 
-  const payload = req.body.toString();
+  const payload = JSON.stringify(req.body);
 
   const headers = {
     "svix-id": req.headers["svix-id"],
