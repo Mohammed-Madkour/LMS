@@ -6,8 +6,15 @@ import { clerkWebhooks } from "./controllers/webhooks.js";
 
 const app = express();
 
+// connect database
+dbConnection();
+
 // Middlewares
 app.use(cors());
+
+// Routes
+app.get("/", (req, res) => res.send("Api Working"));
+app.post("/clerk", express.json(), clerkWebhooks);
 
 app.use((error, req, res, next) => {
   res.status(400).json({
@@ -16,13 +23,6 @@ app.use((error, req, res, next) => {
     statusCode: error.statusCode || 400,
   });
 });
-
-// Routes
-app.get("/", (req, res) => res.send("Api Working"));
-app.post("/clerk", express.raw({ type: "application/json" }), clerkWebhooks);
-
-// connect database
-dbConnection();
 
 const PORT = process.env.port || 5000;
 
