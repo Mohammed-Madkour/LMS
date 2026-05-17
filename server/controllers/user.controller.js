@@ -6,6 +6,7 @@ import UserModel from "../models/User.js";
 import CourseModel from "../models/Course.js";
 import PurchaseModel from "../models/Purchase.js";
 import Stripe from "stripe";
+import CourseProgessModel from "../models/CourseProgress.js";
 
 export const getUserData = catchError(async (req, res, next) => {
   const userId = getAuth(req).userId;
@@ -76,4 +77,67 @@ export const purchaseCourse = catchError(async (req, res, next) => {
   return res.status(200).json({ success: true, session_url: session.url });
 });
 
+export const updateUserCourseProgress = catchError(async (req, res, next) => {
+  const userId = getAuth(req).userId;
+  const { courseId, lectureId } = req.body;
+  const progressData = await CourseProgessModel.findOne({ userId, courseId });
 
+  if (progressData) {
+    if (progressData.lectureCompleted.includes(lectureId)) {
+      return res
+        .status(200)
+        .json({ success: true, message: "Lecture Already Completed" });
+    }
+    progressData.lectureCompleted.push(lectureId);
+    await progressData.save();
+  } else {
+    await CourseProgessModel.create({
+      userId,
+      courseId,
+      lectureCompleted: [lectureId],
+    });
+  }
+
+  return res.status(200).json({ success: true, message: "Progress Updated" });
+});
+
+export const getUserCourseProgress = catchError(async (req, res, next) => {
+  const userId = getAuth(req).userId;
+  const { courseId, lectureId } = req.body;
+  const progressData = await CourseProgessModel.findOne({ userId, courseId });
+
+  return res.status(200).json({ success: true, progressData });
+});
+
+export const addUserRating = catchError(async (req, res, next) => {
+  const userId = getAuth(req).userId;
+  const { courseId, rating } = req.body;
+
+  if (rating < 1 || rating > 5 || !userId || !courseId) {
+    return next(new AppError("Invalid Details", 400));
+  }
+
+  const course = await CourseModel.findById(courseId);
+  if (!course) {
+    return next(new AppError("Course Not Found", 404));
+  }
+
+  const user = await UserModel.findById(userId);
+  if (!user || !user.enrolledCourses.includes(courseId)) {
+    return next(new AppError("User didn't purchase this course", 400));
+  }
+
+  const exisitingRatingIndex = course.courseRatings.findIndex(
+    (r) => r.userId === userId,
+  );
+
+  if (exisitingRatingIndex > -1) {
+    course.courseRatings[exisitingRatingIndex].rating = rating;
+  } else {
+    course.courseRatings.push({ userId, rating });
+  }
+
+  await course.save();
+
+  return res.status(200).json({ sucess: true, message: "Rating added" });
+});

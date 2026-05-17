@@ -72,13 +72,9 @@ export const stripeWebhooks = catchError(async (request, response, next) => {
       const paymentIntent = event.data.object;
       const paymentIntentId = paymentIntent.id;
 
-      console.log(paymentIntent);
-
       const session = await stripeInstance.checkout.sessions.list({
         payment_intent: paymentIntentId,
       });
-
-      console.log("==============session data===========", session.data);
 
       const { purchaseId } = session.data[0].metadata;
 
