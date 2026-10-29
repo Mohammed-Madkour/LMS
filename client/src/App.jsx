@@ -13,10 +13,9 @@ import MyCourses from "./pages/educators/MyCourses";
 import Navbar from "./components/student/Navbar";
 import Footer from "./components/student/Footer";
 import "quill/dist/quill.snow.css";
-
+import { ToastContainer } from "react-toastify";
 
 function App() {
-  
   const isEducator = useMatch("/educator/*");
   return (
     <>
@@ -37,6 +36,7 @@ function App() {
         </Route>
       </Routes>
       {!isEducator && <Footer />}
+      <ToastContainer />
     </>
   );
 }

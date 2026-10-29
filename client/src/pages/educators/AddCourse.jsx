@@ -2,8 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import Quill from "quill";
 import uniqid from "uniqid";
 import { assets } from "../../assets/assets";
+import { useContext } from "react";
+import { AppContext } from "../../context/AppContext";
+import { toast } from "react-toastify";
+import axios from "axios";
 
 const AddCourse = () => {
+  const { getToken, backendUrl } = useContext(AppContext);
   const quillRef = useRef(null);
   const editorRef = useRef(null);
 
@@ -15,6 +20,7 @@ const AddCourse = () => {
     description: "",
     discount: 0,
   });
+
   const [chapters, setChapters] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
   const [currentChapterId, setCurrentChapterId] = useState(null);
@@ -100,6 +106,42 @@ const AddCourse = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      if (!image) {
+        toast.error("Thumbnail is Required");
+        return;
+      }
+      const course = {
+        courseTitle: courseData.title,
+        courseDescription: quillRef.current.root.innerHTML,
+        coursePrice: Number(courseData.price),
+        discount: Number(courseData.discount),
+        courseContent: chapters,
+      };
+
+      const formData = new FormData();
+      formData.append("courseData", JSON.stringify(course));
+      formData.append("image", image);
+
+      const token = await getToken();
+      const { data } = await axios.post(
+        backendUrl + "/api/educator/add-course",
+        formData,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      if (data.success) {
+        toast.success(data.message);
+        setCourseData({ title: "", price: 0, discount: 0, description: "" });
+        setImage(null);
+        setChapters([]);
+        quillRef.current.root.innerHTML = "";
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   useEffect(() => {
@@ -134,7 +176,7 @@ const AddCourse = () => {
         <p className="text-gray-700">Course Description</p>
         <div ref={editorRef}></div>
       </div>
-      <div className="flex md:items-center md:flex-row flex-col justify-between">
+      <div className="flex md:items-center md:flex-row flex-col justify-between gap-3">
         <div className="flex flex-col gap-1 ">
           <label htmlFor="price" className="text-gray-700">
             Course Price

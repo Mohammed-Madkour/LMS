@@ -1,16 +1,37 @@
 import { useEffect, useState } from "react";
 import Loading from "../../components/student/Loading";
-import { dummyStudentEnrolled } from "../../assets/assets";
+import { useContext } from "react";
+import { AppContext } from "../../context/AppContext";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const StudentsEnrolled = () => {
+  const { backendUrl, isEducator, getToken } = useContext(AppContext);
+
   const [enrolledStudents, setEnrolledStudents] = useState(null);
-  const fetchEducatorCourses = () => {
-    setEnrolledStudents(dummyStudentEnrolled);
+  const fetchEducatorCourses = async () => {
+    try {
+      const token = await getToken();
+      const { data } = await axios.get(
+        backendUrl + "/api/educator/enrolled-students",
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      if (data.success) {
+        setEnrolledStudents(data.enrolledStudents);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   useEffect(() => {
-    fetchEducatorCourses();
-  }, []);
+    if (isEducator) {
+      fetchEducatorCourses();
+    }
+  }, [isEducator]);
   return enrolledStudents ? (
     <>
       <h2 className="text-2xl text-gray-900 mt-10 font-medium">
@@ -45,7 +66,9 @@ const StudentsEnrolled = () => {
                   <p>{student.student.name}</p>
                 </td>
                 <td className="px-4 py-3">{student.courseTitle}</td>
-                <td className="px-4 py-3">{(student.purchaseDate).split("T")[0]}</td>
+                <td className="px-4 py-3">
+                  {student.purchaseDate.split("T")[0]}
+                </td>
               </tr>
             ))}
           </tbody>

@@ -9,7 +9,7 @@ const Hero = () => {
     >
       <h1 className="md:text-(length:--home-heading-large) text-(length:--home-heading-small) text-gray-800 font-bold max-w-3xl mx-auto ">
         Empower your future with the courses designed to{" "}
-        <span className="text-(--color-primary) relative">
+        <span className="text-primary relative">
           fit your choice.
           <img
             className="absolute md:block hidden -bottom-7 right-0"

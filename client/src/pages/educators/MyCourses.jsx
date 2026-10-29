@@ -1,22 +1,35 @@
 import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../../context/AppContext";
 import Loading from "../../components/student/Loading";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const MyCourses = () => {
-  const { currency, allCourses } = useContext(AppContext);
+  const { currency, backendUrl, isEducator, getToken } = useContext(AppContext);
 
   const [courses, setCourses] = useState(null);
-  const fetchEducatorCourses = () => {
-    const coursesWithStatus = allCourses.map((course) => ({
-      ...course,
-      isLive: true,
-    }));
-    setCourses(coursesWithStatus);
+  const fetchEducatorCourses = async () => {
+    try {
+      const token = await getToken();
+      const { data } = await axios.get(backendUrl + "/api/educator/courses", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (data.success) {
+        setCourses(data.courses);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   useEffect(() => {
-    fetchEducatorCourses();
-  }, [allCourses]);
+    if (isEducator) {
+      fetchEducatorCourses();
+    }
+  }, [isEducator]);
 
   const toggleCourseStatus = (courseId) => {
     setCourses((prev) =>
@@ -41,9 +54,7 @@ const MyCourses = () => {
               <th className="px-4 py-3 font-semibold truncate">All Courses</th>
               <th className="px-4 py-3 font-semibold truncate">Earnings</th>
               <th className="px-4 py-3 font-semibold truncate">Students</th>
-              <th className="px-4 py-3 font-semibold truncate">
-                Course Status
-              </th>
+              <th className="px-4 py-3 font-semibold truncate">Published At</th>
             </tr>
           </thead>
           <tbody>
@@ -67,26 +78,11 @@ const MyCourses = () => {
                       ((course.coursePrice * (100 - course.discount)) / 100),
                   )}
                 </td>
-                <td className="px-4 py-3 max-sm:hidden">{course.enrolledStudents.length}</td>
-                <td className="px-4 py-3 flex items-center gap-2">
-                  <label>
-                    <input
-                      className="hidden"
-                      type="checkbox"
-                      checked={course.isLive}
-                      onChange={() => toggleCourseStatus(course._id)}
-                    />
-                    <div
-                      className={`${course.isLive ? "bg-primary" : "bg-gray-200"} w-15 h-7 
-                      rounded-full cursor-pointer relative`}
-                    >
-                      <span
-                        className={`bg-white w-5 h-5 rounded-full 
-                          absolute top-1 ${course.isLive ? "left-9" : "left-1"}`}
-                      ></span>
-                    </div>
-                  </label>
-                  <p className="w-5">{course.isLive ? "Live" : "Private"}</p>
+                <td className="px-4 py-3 max-sm:hidden">
+                  {course.enrolledStudents.length}
+                </td>
+                <td className="px-4 py-3">
+                  {course.createdAt.split("T")[0]}
                 </td>
               </tr>
             ))}

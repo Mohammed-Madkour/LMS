@@ -3,11 +3,37 @@ import { Link } from "react-router-dom";
 import { useClerk, UserButton, useUser } from "@clerk/clerk-react";
 import { useContext } from "react";
 import { AppContext } from "../../context/AppContext.jsx";
+import { toast } from "react-toastify";
+import axios from "axios";
 
 const Navbar = () => {
   const { openSignIn } = useClerk();
   const { user } = useUser();
-  const { navigate } = useContext(AppContext);
+  const { navigate, isEducator, backendUrl, getToken, setIsEducator } =
+    useContext(AppContext);
+
+  const becomeEducator = async () => {
+    try {
+      if (isEducator) {
+        navigate("/educator");
+        return;
+      }
+      const token = await getToken();
+      const { data } = await axios.get(
+        backendUrl + "/api/educator/update-role",
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      if (data.success) {
+        setIsEducator(true);
+        toast.success(data.message);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   const isCoursesListPage = location.pathname.includes("courses-list");
   return (
@@ -27,7 +53,9 @@ const Navbar = () => {
       <div className="hidden md:flex items-center gap-5 text-gray-500">
         {user && (
           <div className="flex items-center gap-5">
-            <Link to={"/educator"} className="cursor-pointer">Become Educator</Link>{" "}
+            <button onClick={becomeEducator} className="cursor-pointer">
+              {isEducator ? "Dashboard" : "Become Educator"}
+            </button>{" "}
             <span className="border-r h-4 border-(--border-borderColor)"></span>
             <Link to={"/my-enrollments"}>My Enrollments</Link>
           </div>
@@ -49,8 +77,11 @@ const Navbar = () => {
         {user && (
           <div className="flex items-center gap-1 max-sm:text-xs sm:gap-2 ">
             {" "}
-            <button className="max-sm:text-[13px] cursor-pointer">
-              Become Educator
+            <button
+              className="max-sm:text-[13px] cursor-pointer"
+              onClick={becomeEducator}
+            >
+              {isEducator ? "Dashboard" : "Become Educator"}
             </button>{" "}
             <span className="border-r h-4 border-(--border-borderColor)"></span>
             <Link to={"/my-enrollments"}>My Enrollments</Link>

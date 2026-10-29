@@ -5,7 +5,8 @@ import { assets } from "../../assets/assets";
 import Loading from "../../components/student/Loading";
 import humanizeDuration from "humanize-duration";
 import YouTube from "react-youtube";
-
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const CourseDetails = () => {
   const currency = import.meta.env.VITE_CURRENCY;
@@ -17,21 +18,66 @@ const CourseDetails = () => {
   const [playerData, setPlayerData] = useState(null);
 
   const {
-    allCourses,
     calculateRating,
     calculateChapterTime,
     calculateCourseTime,
     calculateNumberOfLectures,
+    backendUrl,
+    userData,
+    getToken,
   } = useContext(AppContext);
 
   const fetchCourseDetails = async () => {
-    const findCourse = allCourses.find((course) => course._id === id);
-    setCourseDetails(findCourse);
+    try {
+      const { data } = await axios.get(backendUrl + "/api/courses/" + id);
+      if (data.success) {
+        setCourseDetails(data.course);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const enrollCourse = async () => {
+    if (!userData) {
+      return toast.warn("Login to Enroll");
+    }
+    if (isEnrolled) {
+      return toast.warn("User Already is Enrolled in This Course");
+    }
+
+    try {
+      const token = await getToken();
+      const { data } = await axios.post(
+        backendUrl + "/api/user/purchase",
+        {
+          courseId: courseDetails._id,
+        },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      if (data.success) {
+        const { session_url } = data;
+        window.location.replace(session_url);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   useEffect(() => {
     fetchCourseDetails();
-  }, [allCourses]);
+  }, []);
+
+  useEffect(() => {
+    if (userData && courseDetails) {
+      setIsEnrolled(userData.enrolledCourses.includes(courseDetails._id));
+    }
+  }, [userData, courseDetails]);
 
   const toggleSection = (index) => {
     setOpenSection((prev) => ({ ...prev, [index]: !prev[index] }));
@@ -89,7 +135,10 @@ const CourseDetails = () => {
             </p>
           </div>
           <p>
-            Course by <span className="text-blue-600 underline">Madkour</span>
+            Course by{" "}
+            <span className="text-blue-600 underline">
+              {courseDetails.educator.name}
+            </span>
           </p>
         </div>
 
@@ -234,6 +283,7 @@ const CourseDetails = () => {
             </p>
           </div>
           <button
+            onClick={enrollCourse}
             className={`text-white ${isEnrolled ? "bg-gray-500" : "bg-blue-500"} font-medium rounded-md block 
           w-full py-3 ${isEnrolled ? "cursor-not-allowed" : "cursor-pointer"}`}
           >
