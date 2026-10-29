@@ -4,7 +4,7 @@
 
   **A modern full-stack Learning Management System (LMS) built with the MERN stack for dynamic course management, student learning, interactive reviews, and full administration.**
 
-  [![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://lms-4crur2sf1-mohammed-madkours-projects.vercel.app/)
+  [![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://lms-orcin-one.vercel.app/)
   [![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
   [![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
   [![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
@@ -13,7 +13,7 @@
   ---
 
   🚀 **Explore the Live Application:**  
-  ### 🔗 [https://lms-4crur2sf1-mohammed-madkours-projects.vercel.app/](https://lms-4crur2sf1-mohammed-madkours-projects.vercel.app/)
+  ### 🔗 [https://lms-orcin-one.vercel.app/]
 
 </div>
 
