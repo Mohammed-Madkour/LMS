@@ -13,7 +13,7 @@
   ---
 
   🚀 **Explore the Live Application:**  
-  ### 🔗 [https://lms-orcin-one.vercel.app/]
+  ### 🔗 [https://lms-kayaje8eu-mohammed-madkours-projects.vercel.app]
 
 </div>
 
